@@ -79,30 +79,6 @@ audio_placeholder.empty()
 time.sleep(0.5)
 audio_placeholder.markdown(audio_html, unsafe_allow_html=True)
 
-# # 説明セクション
-# explain_1, explain_2 = st.columns([1, 1])
-
-# with explain_1:
-#     st.markdown("""
-# ### 📝 マブダチラップバトルとは？
-
-# **マブダチラップバトル**は、  
-# 友達の名前と“いいところ”を入力するだけで、  
-# 彼らがラップでバトルを繰り広げるゲームです。
-# """)
-
-# with explain_2:
-#     st.markdown("""
-# ### 🔥 このゲームの面白さ
-
-# - **友達を勝手に戦わせる背徳感とおかしさ**  
-# - **ラップを通じて、友達の魅力を再発見できる**
-# """)
-
-# st.markdown("---")
-# st.markdown("ふざけて遊んでるうちに、ちょっと感動する。  \nそんな**友情再発見バトル**を、ぜひどうぞ。")
-# st.markdown("---")
-
 col1, col_chat, col2 = st.columns([1.0, 2, 1.0])
 
 # 左側
@@ -233,13 +209,11 @@ with col_chat:
 
             for idx, flow in enumerate(all_flows):
                 # --- 1. テキスト表示 ---
-                # インデックスが偶数（0, 2, ...）→ 😈、奇数（1, 3, ...）→ 😎
                 if idx % 2 == 0:
                     st.image(image_hidari, caption='', width=50)
                 else:
                     st.image(image_migi, caption='', width=50)
 
-                # 絵文字を先頭に追加して表示
                 st.markdown(f"<p style='font-size: 40px;'>{flow}</p>", unsafe_allow_html=True)
                 st.markdown("---")
 
