@@ -5,9 +5,53 @@ import base64
 import time
 import tempfile
 from pathlib import Path
+from PIL import Image
+
 
 # OpenAI client (new SDK style)
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+# 初回表示のフラグとページ番号
+if "show_intro" not in st.session_state:
+    st.session_state.show_intro = True
+if "intro_page" not in st.session_state:
+    st.session_state.intro_page = 1
+
+# HTMLクリック可能な画像（画像をボタンに見立てる）
+def clickable_image(image_path, next_action):
+    with open(image_path, "rb") as f:
+        data = f.read()
+    b64 = base64.b64encode(data).decode()
+    image_html = f"""
+    <a href="?next={next_action}">
+        <img src="data:image/png;base64,{b64}" 
+             style="display: block; margin-left: auto; margin-right: auto; width: 100%; max-width: 1800px; border-radius: 20px; cursor: pointer;" />
+    </a>
+"""
+    st.markdown(image_html, unsafe_allow_html=True)
+
+# クエリパラメータを確認
+query_params = st.experimental_get_query_params()
+next_action = query_params.get("next", [None])[0]
+
+# --- イントロ表示部分 ---
+if st.session_state.show_intro:
+    if next_action == "page2":
+        st.session_state.intro_page = 2
+        st.experimental_set_query_params()
+    elif next_action == "main":
+        st.session_state.show_intro = False
+        st.experimental_set_query_params()
+        st.experimental_rerun()
+
+    # ページごとの処理
+    if st.session_state.intro_page == 1:
+        clickable_image("start.png", "page2")  # 1ページ目
+        st.stop()
+    elif st.session_state.intro_page == 2:
+        clickable_image("home.png", "main")   # 2ページ目（クリックで本編）
+        st.stop()
+
 
 st.set_page_config(page_title="マブダチラップバトル", layout="wide")
 st.title("🎤 マブダチラップバトル")
@@ -35,57 +79,74 @@ audio_placeholder.empty()
 time.sleep(0.5)
 audio_placeholder.markdown(audio_html, unsafe_allow_html=True)
 
-# 説明セクション
-explain_1, explain_2 = st.columns([1, 1])
+# # 説明セクション
+# explain_1, explain_2 = st.columns([1, 1])
 
-with explain_1:
-    st.markdown("""
-### 📝 マブダチラップバトルとは？
+# with explain_1:
+#     st.markdown("""
+# ### 📝 マブダチラップバトルとは？
 
-**マブダチラップバトル**は、  
-友達の名前と“いいところ”を入力するだけで、  
-彼らがラップでバトルを繰り広げるゲームです。
-""")
+# **マブダチラップバトル**は、  
+# 友達の名前と“いいところ”を入力するだけで、  
+# 彼らがラップでバトルを繰り広げるゲームです。
+# """)
 
-with explain_2:
-    st.markdown("""
-### 🔥 このゲームの面白さ
+# with explain_2:
+#     st.markdown("""
+# ### 🔥 このゲームの面白さ
 
-- **友達を勝手に戦わせる背徳感とおかしさ**  
-- **ラップを通じて、友達の魅力を再発見できる**
-""")
+# - **友達を勝手に戦わせる背徳感とおかしさ**  
+# - **ラップを通じて、友達の魅力を再発見できる**
+# """)
 
-st.markdown("---")
-st.markdown("ふざけて遊んでるうちに、ちょっと感動する。  \nそんな**友情再発見バトル**を、ぜひどうぞ。")
-st.markdown("---")
+# st.markdown("---")
+# st.markdown("ふざけて遊んでるうちに、ちょっと感動する。  \nそんな**友情再発見バトル**を、ぜひどうぞ。")
+# st.markdown("---")
 
 col1, col_chat, col2 = st.columns([1.0, 2, 1.0])
 
 # 左側
 with col1:
-    st.header("😎 左のマブダチ")
-    left_name = st.text_input("名前（左）", "林さん")
+    image_hidari = Image.open("hidari_icon.png")
+    st.image(image_hidari, caption='', use_column_width=True)
+    
+    st.header("左のマブダチ")
+    left_name = st.text_input("名前（左）", value="", placeholder="林さん")
     left_traits = [
-        st.text_input("魅力①（左）", "清潔感がある"),
-        st.text_input("魅力②（左）", "剣道が強い"),
-        st.text_input("魅力③（左）", "英検二級")
+        st.text_input("魅力①（左）", value="", placeholder="清潔感がある"),
+        st.text_input("魅力②（左）", value="", placeholder="剣道が強い"),
+        st.text_input("魅力③（左）", value="", placeholder="英検二級")
+        # st.text_input("魅力①（左）", "清潔感がある"),
+        # st.text_input("魅力②（左）", "剣道が強い"),
+        # st.text_input("魅力③（左）", "英検二級")
     ]
 
 # 右側
 with col2:
-    st.header("😈 右のマブダチ")
-    right_name = st.text_input("名前（右）", "細谷くん")
+    image_migi = Image.open("migi_icon.png")
+    st.image(image_migi, caption='', use_column_width=True)
+    st.header("右のマブダチ")
+    right_name = st.text_input("名前（右）", value="", placeholder="細谷さん")
     right_traits = [
-        st.text_input("魅力①（右）", "デザインがうまい"),
-        st.text_input("魅力②（右）", "嘘がうまい"),
-        st.text_input("魅力③（右）", "SFが好き")
+        
+        st.text_input("魅力①（右）", value="", placeholder="デザインがうまい"),
+        st.text_input("魅力②（右）", value="", placeholder="嘘がうまい"),
+        st.text_input("魅力③（右）", value="", placeholder="友達が多い")
+
+        # st.text_input("魅力①（右）", "デザインがうまい"),
+        # st.text_input("魅力②（右）", "嘘がうまい"),
+        # st.text_input("魅力③（右）", "SFが好き")
     ]
 
 st.markdown("---")
 
 # STARTボタン
 with col_chat:
-    if st.button("🔥 ラップバトル START！"):
+    
+    if st.button("🔥 ラップバトル START！",use_container_width=True):
+        if not left_name or not right_name or "" in left_traits or "" in right_traits:
+            st.warning("⚠️ すべての項目を入力してください！")
+            st.stop()
         with st.spinner("ラップバトル中... 🎤💥"):
             prompt = f"""
 以下の2人がマブダチラップバトルを行います。
@@ -172,16 +233,21 @@ with col_chat:
 
             for idx, flow in enumerate(all_flows):
                 # --- 1. テキスト表示 ---
+                # インデックスが偶数（0, 2, ...）→ 😈、奇数（1, 3, ...）→ 😎
+                if idx % 2 == 0:
+                    st.image(image_hidari, caption='', width=50)
+                else:
+                    st.image(image_migi, caption='', width=50)
+
+                # 絵文字を先頭に追加して表示
+                st.markdown(f"<p style='font-size: 40px;'>{flow}</p>", unsafe_allow_html=True)
                 st.markdown("---")
-                st.markdown(f"<p>{flow}</p>", unsafe_allow_html=True)
 
-
-                time.sleep(10)
+                time.sleep(13)
 
 
 
             # 勝敗判定
-            st.markdown("---")
             st.markdown("### 🏆 勝敗判定")
 
             judge_prompt = f"""
